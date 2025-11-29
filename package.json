@@ -1,11 +1,16 @@
 {
   "name": "n8n-nodes-zapperapi",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Node oficial da ZapperAPI",
   "license": "MIT",
   "homepage": "https://zapperapi.com",
-  "keywords": ["n8n-community-node-package"],
-  "author": { "name": "Jefferson Felix", "email": "jefferson.felix@zapperapi.com" },
+  "keywords": [
+    "n8n-community-node-package"
+  ],
+  "author": {
+    "name": "Jefferson Felix",
+    "email": "jefferson.felix@zapperapi.com"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/zapperapi/n8n-nodes-zapperapi.git"
@@ -19,12 +24,18 @@
     "release": "n8n-node release",
     "prepublishOnly": "n8n-node prerelease"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "n8n": {
     "n8nNodesApiVersion": 1,
     "strict": true,
-    "credentials": ["dist/credentials/ZapperapiApi.credentials.js"],
-    "nodes": ["dist/nodes/Zapperapi/Zapperapi.node.js"]
+    "credentials": [
+      "dist/credentials/ZapperapiApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Zapperapi/Zapperapi.node.js"
+    ]
   },
   "devDependencies": {
     "@n8n/node-cli": "*",
@@ -33,5 +44,7 @@
     "release-it": "^19.0.4",
     "typescript": "5.9.2"
   },
-  "peerDependencies": { "n8n-workflow": "*" }
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
 }
