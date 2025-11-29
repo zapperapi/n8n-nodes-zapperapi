@@ -5,11 +5,17 @@ Este é o node n8n oficial da ZapperAPI.
 [n8n](https://n8n.io/) é uma plataforma [no-code/low-code](https://docs.n8n.io/sustainable-use-license/) de automação de fluxos.
 
 [Instalação](#installation)
+
 [Operations](#operations)
+
 [Credentials](#credentials)
+
 [Compatibility](#compatibility)
+
 [Usage](#usage)
+
 [Resources](#resources)
+
 [Version history](#version-history)
 
 ## Instalação
