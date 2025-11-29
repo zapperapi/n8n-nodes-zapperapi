@@ -36,4 +36,3 @@ Compatível com n8n 1.121 e 2.0
 
 * [Documentação do n8n](https://docs.n8n.io/integrations/#community-nodes)
 * [Documentacão da ZapperAPI](https://docs.zapperapi.com/integrations/n8n)
-
