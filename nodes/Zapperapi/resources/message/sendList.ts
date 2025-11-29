@@ -58,21 +58,82 @@ export const messageSendListDescription: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Sections (JSON)',
-		name: 'sections',
-		type: 'string',
+		displayName: 'Sections',
+		name: 'sectionsUi',
+		placeholder: 'Add Section',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
 		required: true,
 		displayOptions: {
 			show: showOnlyForMessageSendList,
 		},
-		default: '[]',
-		description:
-			'Array de seções. Cada seção tem: title (opcional), rows (obrigatório). Cada row tem: title, description (opcional), rowId.',
+		default: {},
+		description: 'Array de seções. Cada seção tem: title (opcional), rows (obrigatório).',
+		options: [
+			{
+				name: 'sectionValues',
+				displayName: 'Section',
+				values: [
+					{
+						displayName: 'Title',
+						name: 'title',
+						type: 'string',
+						default: '',
+						description: 'Título da seção (opcional)',
+					},
+					{
+						displayName: 'Rows',
+						name: 'rowsUi',
+						placeholder: 'Add Row',
+						type: 'fixedCollection',
+						typeOptions: {
+							multipleValues: true,
+						},
+						required: true,
+						default: {},
+						description: 'Linhas da seção',
+						options: [
+							{
+								name: 'rowValues',
+								displayName: 'Row',
+								values: [
+									{
+										displayName: 'Title',
+										name: 'title',
+										type: 'string',
+										required: true,
+										default: '',
+										description: 'Título da linha',
+									},
+									{
+										displayName: 'Description',
+										name: 'description',
+										type: 'string',
+										default: '',
+										description: 'Descrição da linha (opcional)',
+									},
+									{
+										displayName: 'Row ID',
+										name: 'rowId',
+										type: 'string',
+										required: true,
+										default: '',
+										description: 'ID único da linha',
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+		],
 		routing: {
 			send: {
 				type: 'body',
 				property: 'sections',
-				value: '={{!$value || (typeof $value === "string" && !$value.trim()) ? [] : (typeof $value === "string" ? JSON.parse($value) : (Array.isArray($value) ? $value : []))}}',
+				value: '={{$value.sectionValues ? $value.sectionValues.map(section => ({ title: section.title || undefined, rows: section.rowsUi?.rowValues ? section.rowsUi.rowValues.map(row => ({ title: row.title, description: row.description || undefined, rowId: row.rowId })) : [] })).filter(section => section.rows.length > 0) : []}}',
 			},
 		},
 	},

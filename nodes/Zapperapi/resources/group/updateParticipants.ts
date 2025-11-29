@@ -48,18 +48,39 @@ export const groupUpdateParticipantsDescription: INodeProperties[] = [
 	},
 	{
 		displayName: 'Participants',
-		name: 'participants',
-		type: 'string',
+		name: 'participantsUi',
+		placeholder: 'Add Participant',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
 		required: true,
 		displayOptions: {
 			show: showOnlyForGroupUpdateParticipants,
 		},
-		default: '',
-		description: 'Lista de participantes que deseja alterar. Use formato JSON array, ex: ["5511912345678@s.whatsapp.net", "5511987654321@s.whatsapp.net"].',
+		default: {},
+		description: 'Lista de participantes que deseja alterar',
+		options: [
+			{
+				name: 'participantValues',
+				displayName: 'Participant',
+				values: [
+					{
+						displayName: 'JID',
+						name: 'jid',
+						type: 'string',
+						required: true,
+						default: '',
+						description: 'JID do participante (ex: 5511912345678@s.whatsapp.net)',
+					},
+				],
+			},
+		],
 		routing: {
 			send: {
 				type: 'body',
 				property: 'participants',
+				value: '={{$value.participantValues ? $value.participantValues.map(item => item.jid).filter(jid => jid) : []}}',
 			},
 		},
 	},

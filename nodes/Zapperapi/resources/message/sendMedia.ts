@@ -139,19 +139,39 @@ export const messageSendMediaDescription: INodeProperties[] = [
 	},
 	{
 		displayName: 'Mentions',
-		name: 'mentions',
-		type: 'string',
+		name: 'mentionsUi',
+		placeholder: 'Add Mention',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
 		displayOptions: {
 			show: showOnlyForMessageSendMedia,
 		},
-		default: '[]',
+		default: {},
 		description:
-			'Lista de números que deseja mencionar na mensagem. Campo opcional e só tem efeito em envio de mensagens para grupos. Use formato JSON array, ex: ["5511912345678", "5511987654321"]',
+			'Lista de números que deseja mencionar na mensagem. Campo opcional e só tem efeito em envio de mensagens para grupos.',
+		options: [
+			{
+				name: 'mentionValues',
+				displayName: 'Mention',
+				values: [
+					{
+						displayName: 'Phone Number',
+						name: 'number',
+						type: 'string',
+						required: true,
+						default: '',
+						description: 'Número de telefone no formato completo, com código do país (ex: 5511912345678)',
+					},
+				],
+			},
+		],
 		routing: {
 			send: {
 				type: 'body',
 				property: 'mentions',
-				value: '={{!$value || (typeof $value === "string" && !$value.trim()) ? [] : (typeof $value === "string" ? JSON.parse($value) : (Array.isArray($value) ? $value : []))}}',
+				value: '={{$value.mentionValues ? $value.mentionValues.map(item => item.number).filter(num => num) : []}}',
 			},
 		},
 	},

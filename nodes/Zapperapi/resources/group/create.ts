@@ -89,17 +89,38 @@ export const groupCreateDescription: INodeProperties[] = [
 	},
 	{
 		displayName: 'Participants',
-		name: 'participants',
-		type: 'string',
+		name: 'participantsUi',
+		placeholder: 'Add Participant',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
 		displayOptions: {
 			show: showOnlyForGroupCreate,
 		},
-		default: '',
-		description: 'Lista inicial de participantes do grupo. Use formato JSON array, ex: ["5511912345678@s.whatsapp.net", "5511987654321@s.whatsapp.net"].',
+		default: {},
+		description: 'Lista inicial de participantes do grupo',
+		options: [
+			{
+				name: 'participantValues',
+				displayName: 'Participant',
+				values: [
+					{
+						displayName: 'JID',
+						name: 'jid',
+						type: 'string',
+						required: true,
+						default: '',
+						description: 'JID do participante (ex: 5511912345678@s.whatsapp.net)',
+					},
+				],
+			},
+		],
 		routing: {
 			send: {
 				type: 'body',
 				property: 'participants',
+				value: '={{$value.participantValues ? $value.participantValues.map(item => item.jid).filter(jid => jid) : []}}',
 			},
 		},
 	},
