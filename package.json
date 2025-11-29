@@ -3,9 +3,9 @@
   "version": "1.0.1",
   "description": "Node oficial da ZapperAPI",
   "license": "MIT",
-  "homepage": "",
+  "homepage": "https://zapperapi.com",
   "keywords": ["n8n-community-node-package"],
-  "author": { "name": "Jefferson Felix", "email": "me@jeffersonfelix.dev" },
+  "author": { "name": "Jefferson Felix", "email": "jefferson.felix@zapperapi.com" },
   "repository": {
     "type": "git",
     "url": "https://github.com/zapperapi/n8n-nodes-zapperapi.git"
