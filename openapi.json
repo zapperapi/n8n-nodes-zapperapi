@@ -1,0 +1,3804 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ZapperAPI",
+    "description": "Documentação oficial da ZapperAPI",
+    "version": "v2"
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "description": "Chave privada da API",
+        "name": "X-Api-Key",
+        "in": "header"
+      }
+    },
+    "schemas": {
+
+    }
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Obter status da API",
+        "tags": [
+          "API Status"
+        ],
+        "description": "Obtém o status da API para fins de monitoramento de disponibilidade",
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "UP"
+                      ]
+                    },
+                    "message": {
+                      "type": "string",
+                      "enum": [
+                        "welcome to zapperapi-core"
+                      ]
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "waVersion": {
+                      "type": "string"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "version",
+                    "waVersion",
+                    "docs"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connection": {
+      "get": {
+        "summary": "Obter conexão do WhatsApp",
+        "tags": [
+          "Conexão"
+        ],
+        "description": "Retorna um QR Code para se conectar ao WhatsApp do\n          dispositivo ou exibe os dados da conexão ativa. Caso o parâmetro\n          `number` seja informado, um código de confirmação será enviado para\n          este número, para um pareamento sem o uso de QR Code.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "number",
+            "required": false,
+            "description": "Número do WhatsApp que deseja receber um código de confirmação"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "instanceType": {
+                      "type": "string",
+                      "enum": [
+                        "device",
+                        "cloud_api"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Status da conexão"
+                    },
+                    "metaUrlCallback": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "metaVerificationToken": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "displayPhoneNumber": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "image": {
+                          "type": "string"
+                        },
+                        "businessProfile": {
+                          "type": "object",
+                          "properties": {
+                            "address": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "description": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "website": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "nullable": true
+                            },
+                            "email": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "category": {
+                              "type": "string",
+                              "nullable": true
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "additionalProperties": false,
+                      "nullable": true
+                    },
+                    "qrCode": {
+                      "type": "string",
+                      "description": "QR Code no formato base64URL"
+                    },
+                    "pairingCode": {
+                      "type": "string",
+                      "description": "Código de pareamento para opção sem QR Code"
+                    }
+                  },
+                  "required": [
+                    "instanceType",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Desconectar o WhatsApp",
+        "tags": [
+          "Conexão"
+        ],
+        "description": "Desconecta o WhatsApp da API.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "close"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connection/cloud-api": {
+      "post": {
+        "summary": "Conectar Cloud API",
+        "tags": [
+          "Cloud API"
+        ],
+        "description": "Conecta a instância com o WhatsApp Cloud API. Se a instância estiver conectada em um dispositivo, ela será desconectada.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phoneNumberId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "ID do número de telefone na Meta"
+                  },
+                  "businessAccountId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "ID da conta de negócios na Meta"
+                  },
+                  "accessToken": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Token de acesso da Meta com permissão para o WhatsApp Business API"
+                  }
+                },
+                "required": [
+                  "phoneNumberId",
+                  "businessAccountId",
+                  "accessToken"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID do número de telefone na Meta"
+                    },
+                    "display_phone_number": {
+                      "type": "string",
+                      "description": "Número de telefone de exibição"
+                    },
+                    "verified_name": {
+                      "type": "string",
+                      "description": "Nome do usuário"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Status da conexão"
+                    },
+                    "metaUrlCallback": {
+                      "type": "string",
+                      "description": "URL de callback para o webhook da Meta"
+                    },
+                    "metaVerificationToken": {
+                      "type": "string",
+                      "description": "Token de verificação para o webhook da Meta"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "display_phone_number",
+                    "verified_name",
+                    "status",
+                    "metaUrlCallback",
+                    "metaVerificationToken"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile/name": {
+      "patch": {
+        "summary": "Alterar nome do perfil",
+        "tags": [
+          "Perfil"
+        ],
+        "description": "Altera o nome do perfil da conta de WhatsApp conectada.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Novo nome do perfil"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/profile/status": {
+      "patch": {
+        "summary": "Alterar status do perfil",
+        "tags": [
+          "Perfil"
+        ],
+        "description": "Altera o status do perfil da conta de WhatsApp conectada.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "description": "Texto do status do perfil"
+                  }
+                },
+                "required": [
+                  "status"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/profile/picture": {
+      "patch": {
+        "summary": "Alterar foto do perfil",
+        "tags": [
+          "Perfil"
+        ],
+        "description": "Altera a foto do perfil da conta de WhatsApp conectada.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "picture": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "URL ou Base64 da imagem a ser enviada"
+                  }
+                },
+                "required": [
+                  "picture"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remover foto do perfil",
+        "tags": [
+          "Perfil"
+        ],
+        "description": "Remove o foto do perfil da conta de WhatsApp conectada.",
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/text": {
+      "post": {
+        "summary": "Enviar mensagem de texto",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem de texto para um número de telefone ou grupo. Caso a mensagem possua um link, ele será clicável e uma imagem de preview do site será exibida na mensagem.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID, id do grupo ou id da newsletter/canal. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`.\n\n\n      Para enviar mensagem para canais, o id deve ser enviado acrescido de `@newsletter`."
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Texto da mensagem a ser enviada"
+                  },
+                  "mentions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "Id do contato (número ou lid). Para números de telefone, pode ser enviado com ou sem o sufixo `@s.whatsapp.net`. Para lids, sempre use o sufixo `@lid`"
+                    },
+                    "description": "Lista de números que deseja mencionar na mensagem. Campo opcional e só tem efeito em envio de mensagens para grupos"
+                  },
+                  "mentionsEveryone": {
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Indica se deseja mencionar todos os participantes do grupo. Use com cautela. Caso esta opção esteja ativa, o parâmetro `mentions` será ignorado."
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "splitMessage": {
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Divide a mensagem em várias mensagens menores. A divisão é feita baseado nas quebras de linha da mensagem original."
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "processImageLink": {
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Processa os links de imagem dentro da mensagem como imagens. Caso a mensagem possua um link de imagem, o conteúdo do link será enviado como uma imagem logo após a mensagem de texto. Caso a função `splitMessage` esteja ativa, cada parte da mensagem será processada para verificar se possui links de imagem."
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "autoCaption": {
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Caso processImageLink esteja ativo, utiliza o texto da mensagem como legenda para a imagem."
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "expiration": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "24h",
+                      "7d",
+                      "90d"
+                    ],
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  }
+                },
+                "required": [
+                  "jid",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/audio": {
+      "post": {
+        "summary": "Enviar mensagem de áudio",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem de áudio para um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  },
+                  "audio": {
+                    "type": "string",
+                    "description": "Áudio a ser encaminhado. Pode ser nos formatos mp3, mp4, wav,\n      ogg. Pode ser utilizado uma URL (http/https), arquivo no formato base64 ou\n      uma URL base64."
+                  },
+                  "expiration": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "24h",
+                      "7d",
+                      "90d"
+                    ],
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  }
+                },
+                "required": [
+                  "jid",
+                  "audio"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/media": {
+      "post": {
+        "summary": "Enviar mensagem de mídia",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem de mídia para um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  },
+                  "mediaType": {
+                    "type": "string",
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio",
+                      "document"
+                    ],
+                    "description": "Tipo de mídia a ser enviada."
+                  },
+                  "mimetype": {
+                    "type": "string",
+                    "description": "Mimetype do arquivo enviado (ex: image/png). Aplicável\n        somente para o tipo de mídia `document`"
+                  },
+                  "media": {
+                    "type": "string",
+                    "description": "Mídia a ser encaminhada. Pode ser utilizado uma URL\n    (http/https), arquivo no formato base64 ou uma URL base64."
+                  },
+                  "caption": {
+                    "type": "string",
+                    "description": "Legenda da mídia. Não se aplica ao tipo de mídia `audio`\n        e ao tipo de mídia `video` quando `videoNote` está ativo"
+                  },
+                  "filename": {
+                    "type": "string",
+                    "description": "Nome do arquivo. Aplicável somente para mídias do tipo `document`"
+                  },
+                  "videoNote": {
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Enviar vídeo como nota (em um círculo)"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "mentions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "Id do contato (número ou lid). Para números de telefone, pode ser enviado com ou sem o sufixo `@s.whatsapp.net`. Para lids, sempre use o sufixo `@lid`"
+                    },
+                    "description": "Lista de números que deseja mencionar na mensagem. Campo opcional e só tem efeito em envio de mensagens para grupos"
+                  },
+                  "mentionsEveryone": {
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Indica se deseja mencionar todos os participantes do grupo. Use com cautela. Caso esta opção esteja ativa, o parâmetro `mentions` será ignorado."
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "expiration": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "24h",
+                      "7d",
+                      "90d"
+                    ],
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  }
+                },
+                "required": [
+                  "jid",
+                  "mediaType",
+                  "media"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/sticker": {
+      "post": {
+        "summary": "Enviar sticker",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem de mídia em formato de sticker para um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  },
+                  "sticker": {
+                    "type": "string",
+                    "description": "Sticker a ser encaminhado. Pode ser utilizado uma URL (http/https) ou arquivo no formato base64."
+                  },
+                  "expiration": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "24h",
+                      "7d",
+                      "90d"
+                    ],
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  }
+                },
+                "required": [
+                  "jid",
+                  "sticker"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/location": {
+      "post": {
+        "summary": "Enviar localização",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem de localização para um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  },
+                  "location": {
+                    "type": "object",
+                    "properties": {
+                      "lat": {
+                        "type": "number"
+                      },
+                      "lon": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "lat",
+                      "lon"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "expiration": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "24h",
+                      "7d",
+                      "90d"
+                    ],
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  }
+                },
+                "required": [
+                  "jid",
+                  "location"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/contact": {
+      "post": {
+        "summary": "Enviar contato",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem de contato para um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  },
+                  "vcard": {
+                    "type": "object",
+                    "properties": {
+                      "fn": {
+                        "type": "string",
+                        "description": "Nome completo do contato"
+                      },
+                      "n": {
+                        "type": "object",
+                        "properties": {
+                          "lastName": {
+                            "type": "string",
+                            "description": "Último nome do contato"
+                          },
+                          "firstName": {
+                            "type": "string",
+                            "description": "Primeiro nome do contato"
+                          },
+                          "additionalNames": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Nomes adicionais"
+                          },
+                          "prefixes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Prefixos do nome (ex: Sir)"
+                          },
+                          "suffixes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Sufixos do nome (I, II, III)"
+                          }
+                        },
+                        "required": [
+                          "lastName",
+                          "firstName"
+                        ],
+                        "additionalProperties": false,
+                        "description": "Os componentes estruturados no nome do contato"
+                      },
+                      "nickname": {
+                        "type": "string",
+                        "description": "Apelido"
+                      },
+                      "photo": {
+                        "type": "string",
+                        "description": "URL da foto ou imagem em formato base64"
+                      },
+                      "bday": {
+                        "type": "string",
+                        "description": "Data de nascimento do contato"
+                      },
+                      "adr": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "postOfficeBox": {
+                              "type": "string",
+                              "description": "Caixa postal"
+                            },
+                            "extendedAddress": {
+                              "type": "string",
+                              "description": "Detalhes adicionais do endereço"
+                            },
+                            "streetAddress": {
+                              "type": "string",
+                              "description": "Nome da rua"
+                            },
+                            "locality": {
+                              "type": "string",
+                              "description": "Cidade ou localização"
+                            },
+                            "region": {
+                              "type": "string",
+                              "description": "Estado ou província"
+                            },
+                            "postalCode": {
+                              "type": "string",
+                              "description": "Código postal (CEP/zipcode)"
+                            },
+                            "countryName": {
+                              "type": "string",
+                              "description": "Nome do país"
+                            },
+                            "type": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Tipo de endereço (ex: 'home', 'work')."
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        "description": "Dados estruturados do endereço"
+                      },
+                      "tel": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "description": "Número de telefone"
+                            },
+                            "type": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Tipo de telefone (ex: 'home', 'work', 'cell')."
+                            }
+                          },
+                          "required": [
+                            "value"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "description": "Uma ou mais entradas de telefone"
+                      },
+                      "email": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "format": "email",
+                              "description": "Endereço de email"
+                            },
+                            "type": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Tipo de email (ex: 'home', 'work')."
+                            }
+                          },
+                          "required": [
+                            "value"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "description": "Um ou mais endereços de email"
+                      },
+                      "url": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "Url do website do contato"
+                      },
+                      "org": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Dados da organização do contato"
+                      },
+                      "title": {
+                        "type": "string",
+                        "description": "Título do contato em sua organização"
+                      },
+                      "role": {
+                        "type": "string",
+                        "description": "Papel ou ocupação do contato em sua organização"
+                      },
+                      "logo": {
+                        "type": "string",
+                        "description": "URL do logo"
+                      },
+                      "note": {
+                        "type": "string",
+                        "description": "Notas adicionais"
+                      },
+                      "categories": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Tags/categorias associadas ao contato"
+                      }
+                    },
+                    "required": [
+                      "fn"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "expiration": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "24h",
+                      "7d",
+                      "90d"
+                    ],
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  }
+                },
+                "required": [
+                  "jid",
+                  "vcard"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/react": {
+      "post": {
+        "summary": "Reagir a mensagem",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia um emoji de reação a uma mensagem em conversa particular ou em grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remoteJid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Id da conversa onde ocorreu a mensagem. Pode ser um número de WhatsApp ou um grupo"
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "Id da mensagem que deseja reagir"
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1,
+                    "description": "Emoji da reação. Qualquer outro tipo de caracter que não seja um emoji não irá funcionar"
+                  },
+                  "participant": {
+                    "type": "string",
+                    "description": "Id do participante que enviou a mensagem. Necessário somente para grupos"
+                  }
+                },
+                "required": [
+                  "remoteJid",
+                  "id",
+                  "text",
+                  "participant"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/delete": {
+      "post": {
+        "summary": "Excluir mensagem",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Exclui uma mensagem enviada pelo WhatsApp. É necessário informar a chave da mensagem, que é exatamente como recebida pelo webhook. Só é possível deletar mensagens enviadas pela própria conta conectada, ou no caso de grupos, pelo proprietário ou administrador do grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "object",
+                    "properties": {
+                      "remoteJid": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "JID da mensagem (número do telefone ou grupo para onde foi enviada a mensagem)"
+                      },
+                      "fromMe": {
+                        "type": "boolean",
+                        "nullable": true,
+                        "description": "Indica se a mensagem foi enviada pela própria conta conectada"
+                      },
+                      "id": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Identificador único da mensagem"
+                      },
+                      "participant": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "JID do participante que enviou a mensagem (nos casos de mensagem enviada em grupo)"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Chave da mensagem, deve ser exatamente como recebida pelo webhook"
+                  }
+                },
+                "required": [
+                  "key"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/buttons": {
+      "post": {
+        "summary": "Enviar mensagem com botões",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem com botões de ação ou de resposta rápida para um número de telefone. Para grupos, não é possível enviar botões de resposta rápida. Caso queira enviar uma imagem ou vídeo no corpo da mensagem, utilize os campos `media` e `mediaType`",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  },
+                  "body": {
+                    "type": "string",
+                    "description": "Texto do corpo da mensagem"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Título da mensagem"
+                  },
+                  "footer": {
+                    "type": "string",
+                    "description": "Texto do rodapé da mensagem"
+                  },
+                  "media": {
+                    "type": "string",
+                    "description": "URL da mídia a ser encaminhada junto com a mensagem (tipo url, copy, call)"
+                  },
+                  "mediaType": {
+                    "type": "string",
+                    "enum": [
+                      "image",
+                      "video"
+                    ],
+                    "description": "Tipo de mídia a ser encaminhada junto com a mensagem (`image` ou `video`)"
+                  },
+                  "expiration": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "24h",
+                      "7d",
+                      "90d"
+                    ],
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  },
+                  "buttons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "url",
+                            "copy",
+                            "call",
+                            "reply"
+                          ]
+                        },
+                        "displayText": {
+                          "type": "string",
+                          "description": "Texto de exibição do botão"
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "identificador único do botão"
+                        },
+                        "copyCode": {
+                          "type": "string",
+                          "description": "Valor a ser copiado ao clicar no botão (tipo copy)"
+                        },
+                        "url": {
+                          "type": "string",
+                          "description": "URL a ser acessada ao clicar no botão (tipo url)"
+                        },
+                        "phoneNumber": {
+                          "type": "string",
+                          "description": "Número de telefone a ser chamado ao clicar no botão (tipo call)"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "displayText",
+                        "id"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "jid",
+                  "buttons"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/list": {
+      "post": {
+        "summary": "Enviar mensagem de lista",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem com lista de opções para um número de telefone.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "description": "Id do contato (número ou lid). Para números de telefone, pode ser enviado com ou sem o sufixo `@s.whatsapp.net`. Para lids, sempre use o sufixo `@lid`"
+                  },
+                  "buttonText": {
+                    "type": "string",
+                    "description": "Texto do botão de acesso a lista"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Título da mensagem"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Descrição da mensagem"
+                  },
+                  "footer": {
+                    "type": "string",
+                    "description": "Rodapé da mensagem"
+                  },
+                  "sections": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "description": "Título da seção"
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "title": {
+                                "type": "string",
+                                "description": "Título da linha"
+                              },
+                              "description": {
+                                "type": "string",
+                                "description": "Descrição da linha"
+                              },
+                              "rowId": {
+                                "type": "string",
+                                "description": "Identificador da linha"
+                              }
+                            },
+                            "required": [
+                              "title",
+                              "rowId"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "rows"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "expiration": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "24h",
+                      "7d",
+                      "90d"
+                    ],
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  }
+                },
+                "required": [
+                  "jid",
+                  "buttonText",
+                  "description",
+                  "sections"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/carousel": {
+      "post": {
+        "summary": "Enviar mensagem com carousel",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem com carousel.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  },
+                  "message": {
+                    "type": "string",
+                    "description": "Mensagem do carousel"
+                  },
+                  "expiration": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "24h",
+                      "7d",
+                      "90d"
+                    ],
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  },
+                  "carousel": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "text": {
+                          "type": "string",
+                          "description": "Texto do cartão"
+                        },
+                        "image": {
+                          "type": "string",
+                          "description": "URL da imagem do cartão"
+                        },
+                        "buttons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "description": "ID do botão"
+                              },
+                              "displayText": {
+                                "type": "string",
+                                "description": "Texto do botão"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "url",
+                                  "copy",
+                                  "call",
+                                  "reply"
+                                ],
+                                "description": "Tipo de botão"
+                              },
+                              "url": {
+                                "type": "string",
+                                "description": "URL do botão"
+                              },
+                              "phoneNumber": {
+                                "type": "string",
+                                "description": "Número de telefone do botão"
+                              },
+                              "copyCode": {
+                                "type": "string",
+                                "description": "Texto a ser copiado ao clicar no botão"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "displayText",
+                              "type"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "text",
+                        "image",
+                        "buttons"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "jid",
+                  "message",
+                  "carousel"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/message-stats": {
+      "get": {
+        "summary": "Estatísticas de mensagens",
+        "tags": [
+          "Estatísticas"
+        ],
+        "description": "Retorna as estatísticas de mensagens da instância (mensagens enviadas pela API), com agrupamento por dia ou mês. A consulta é limitada a um período de 180 dias",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "default": {
+
+              }
+            },
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "description": "Data de início do período. Opcional, se não for informada, será considerado o início do mês atual"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "default": {
+
+              }
+            },
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "description": "Data de fim do período. Opcional, se não for informada, será considerada a data atual"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "day",
+                "month"
+              ],
+              "default": "day"
+            },
+            "in": "query",
+            "name": "groupBy",
+            "required": false,
+            "description": "Agrupar por dia ou mês. Opcional, se não for informado, será considerado o agrupamento por dia"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "date": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "count": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "date",
+                          "count"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chats/archive": {
+      "patch": {
+        "summary": "Arquivar chat",
+        "tags": [
+          "Chats"
+        ],
+        "description": "Arquiva uma conversa com um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  }
+                },
+                "required": [
+                  "jid"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/chats/unarchive": {
+      "patch": {
+        "summary": "Desarquivar chat",
+        "tags": [
+          "Chats"
+        ],
+        "description": "Desarquiva uma conversa com um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  }
+                },
+                "required": [
+                  "jid"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/chats/mute": {
+      "patch": {
+        "summary": "Silenciar/Desilenciar chat",
+        "tags": [
+          "Chats"
+        ],
+        "description": "Silencia uma conversa com um número de telefone ou grupo por 8 horas (`8h`) ou 7 dias (`7d`). Se o campo `time` for \"remove\", a conversa será desilenciada.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  },
+                  "time": {
+                    "type": "string",
+                    "enum": [
+                      "8h",
+                      "7d",
+                      "remove"
+                    ]
+                  }
+                },
+                "required": [
+                  "jid",
+                  "time"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/chats/pin": {
+      "patch": {
+        "summary": "Fixar/desfixar chat",
+        "tags": [
+          "Chats"
+        ],
+        "description": "Fixa ou desfixa uma conversa com um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  },
+                  "pin": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "jid",
+                  "pin"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/chats/delete": {
+      "post": {
+        "summary": "Remover chat",
+        "tags": [
+          "Chats"
+        ],
+        "description": "Remove uma conversa com um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  }
+                },
+                "required": [
+                  "jid"
+                ],
+                "additionalProperties": false,
+                "description": "A chave da última mensagem da conversa"
+              }
+            }
+          },
+          "required": true,
+          "description": "A chave da última mensagem da conversa"
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/contacts/check-numbers": {
+      "post": {
+        "summary": "Checar números de WhatsApp",
+        "tags": [
+          "Contatos"
+        ],
+        "description": "Verifica se os números informados estão cadastrados no WhatsApp",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "numbers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "description": "Lista de números a ser checada"
+                  }
+                },
+                "required": [
+                  "numbers"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "numbers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "exists": {
+                            "description": "Indica que o número existe"
+                          },
+                          "jid": {
+                            "type": "string",
+                            "description": "Id do número no WhatsApp"
+                          },
+                          "lid": {
+                            "description": "LID"
+                          }
+                        },
+                        "required": [
+                          "jid"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups": {
+      "post": {
+        "summary": "Criar grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Cria um grupo no WhatsApp",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome do grupo"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Descrição do grupo"
+                  },
+                  "displayPicture": {
+                    "type": "string",
+                    "description": "Imagem de perfil do grupo, podendo ser uma URL, o arquivo no formato base64 ou uma Data URI no formato base64."
+                  },
+                  "announcement": {
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Indica se o grupo só permite postagens dos admins"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "locked": {
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Indica se o grupo é bloqueado para edição e somente pode ser alterado por admins"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "participants": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "JID do participante"
+                    },
+                    "description": "Lista inicial de participantes do grupo"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "summary": "Listar grupos",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Lista todos os grupos que o usuário participa.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "default": "false"
+            },
+            "in": "query",
+            "name": "showParticipants",
+            "required": false,
+            "description": "Indica se deseja mostrar os participantes dos grupos"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "groups": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "owner": {
+                            "type": "string"
+                          },
+                          "subject": {
+                            "type": "string"
+                          },
+                          "subjectOwner": {
+                            "type": "string"
+                          },
+                          "subjectTime": {
+                            "type": "number"
+                          },
+                          "creation": {
+                            "type": "number"
+                          },
+                          "desc": {
+                            "type": "string"
+                          },
+                          "descOwner": {
+                            "type": "string"
+                          },
+                          "descId": {
+                            "type": "string"
+                          },
+                          "linkedParent": {
+                            "type": "string"
+                          },
+                          "restrict": {
+                            "type": "boolean"
+                          },
+                          "announce": {
+                            "type": "boolean"
+                          },
+                          "memberAddMode": {
+                            "type": "boolean"
+                          },
+                          "joinApprovalMode": {
+                            "type": "boolean"
+                          },
+                          "isCommunity": {
+                            "type": "boolean"
+                          },
+                          "isCommunityAnnounce": {
+                            "type": "boolean"
+                          },
+                          "size": {
+                            "type": "number"
+                          },
+                          "participants": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "isAdmin": {
+                                  "type": "boolean"
+                                },
+                                "isSuperAdmin": {
+                                  "type": "boolean"
+                                },
+                                "admin": {
+                                  "type": "string",
+                                  "enum": [
+                                    "admin",
+                                    "superadmin"
+                                  ],
+                                  "nullable": true
+                                }
+                              },
+                              "required": [
+                                "id"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "ephemeralDuration": {
+                            "type": "number"
+                          },
+                          "inviteCode": {
+                            "type": "string"
+                          },
+                          "author": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "subject"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "groups"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups/{groupId}": {
+      "get": {
+        "summary": "Obter grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Obtém informações de um grupo no WhatsApp e seus participantes.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "description": "Id do grupo, com ou sem o sufixo `@g.us`"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Atualizar grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Atualiza informações de um grupo no WhatsApp.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Novo nome do grupo"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Nova descrição do grupo"
+                  },
+                  "displayPicture": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Nova imagem de perfil do grupo, podendo ser uma URL, o arquivo no formato base64 ou uma Data URI no formato base64. Caso enviar o valor `null`, a imagem atual será removida."
+                  },
+                  "announcement": {
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Indica se o grupo só permite postagens dos admins"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "locked": {
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Indica se o grupo é bloqueado para edição e somente pode ser alterado por admins"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "description": "Id do grupo, com ou sem o sufixo `@g.us`"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/groups/{groupId}/participants": {
+      "patch": {
+        "summary": "Atualizar participantes do grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Atualiza os participantes de um grupo no WhatsApp, adicionando ou removendo no grupo, ou ainda promovendo ou revogandos como admins.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "participants": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "Id do participante"
+                    },
+                    "minItems": 1,
+                    "description": "Lista de participantes que deseja alterar"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "add",
+                      "promote",
+                      "demote",
+                      "remove"
+                    ],
+                    "description": "Ação que deseja realizar nos participantes (add: adicionar - remove: remover - promote: promover a admin - demote: revogar admin"
+                  }
+                },
+                "required": [
+                  "participants",
+                  "action"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "description": "Id do grupo, com ou sem o sufixo `@g.us`"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/groups/{groupId}/invite-code": {
+      "get": {
+        "summary": "Obter código de convite",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Obtém o código de convite para entrar em um grupo.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "description": "Id do grupo, com ou sem o sufixo `@g.us`"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "inviteCode": {
+                      "type": "string"
+                    },
+                    "inviteUrl": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  },
+                  "required": [
+                    "inviteCode",
+                    "inviteUrl"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/newsletter": {
+      "post": {
+        "summary": "Criar canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Cria um novo canal",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome do canal"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Descrição do canal (opcional)"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/newsletter/{id}": {
+      "delete": {
+        "summary": "Deletar canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Deleta um canal",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do canal (com ou sem o sufixo @newsletter)"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Atualiza os dados de um canal (nome e descrição).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome do canal"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Descrição do canal (opcional)"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do canal (com ou sem o sufixo @newsletter)"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/newsletter/{type}/{id}": {
+      "get": {
+        "summary": "Obter dados do canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Obtém dados de um canal pelo código do convite ou pelo ID do canal.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "invite",
+                "jid"
+              ]
+            },
+            "in": "path",
+            "name": "type",
+            "required": true,
+            "description": "Tipo de busca (`invite` para código do convite, `jid` para ID do canal)"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Código do convite ou ID do canal (com ou sem o sufixo @newsletter no final)"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/newsletters": {
+      "get": {
+        "summary": "Listar canais",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Lista todos os canais que o usuário participa ou é dono.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/newsletter/{id}/profile-picture": {
+      "post": {
+        "summary": "Upload da imagem de perfil do canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Realiza o upload de imagem para o perfil do canal.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "description": "Imagem a ser enviada. Pode ser utilizado uma URL (http/https), arquivo no formato base64 ou uma URL base64."
+                  }
+                },
+                "required": [
+                  "image"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do canal (com ou sem o sufixo @newsletter)"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/newsletter/{id}/follow": {
+      "patch": {
+        "summary": "Seguir canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Segue um canal.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do canal (com ou sem o sufixo @newsletter)"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/newsletter/{id}/unfollow": {
+      "patch": {
+        "summary": "Deixar de seguir canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Deixa de seguir um canal.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do canal (com ou sem o sufixo @newsletter)"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/integrations": {
+      "post": {
+        "summary": "Criar/Atualizar integração",
+        "tags": [
+          "Integrações"
+        ],
+        "description": "Cria uma nova integração com um agente de IA ou atualiza uma existente. Opções disponíveis: Chatvolt e GPT Maker. As conversas são apagadas e recriadas com a nova integração.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "CHATVOLT",
+                      "GPTMAKER",
+                      "ZAIA"
+                    ],
+                    "description": "Tipo de integração"
+                  },
+                  "apiKey": {
+                    "type": "string",
+                    "description": "Chave da API do serviço de IA"
+                  },
+                  "agentId": {
+                    "type": "string",
+                    "description": "ID do agente de conversação do serviço de IA"
+                  },
+                  "disableOnMessage": {
+                    "type": "boolean",
+                    "description": "Desabilita a integração quando enviar uma mensagem de texto por dispositivo, WhatsApp Web ou Desktop"
+                  }
+                },
+                "required": [
+                  "type",
+                  "apiKey",
+                  "agentId",
+                  "disableOnMessage"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "summary": "Buscar integração",
+        "tags": [
+          "Integrações"
+        ],
+        "description": "Obtém os dados da integração ativa.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "integration": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "CHATVOLT",
+                            "GPTMAKER",
+                            "ZAIA"
+                          ],
+                          "description": "Tipo de integração"
+                        },
+                        "enabled": {
+                          "type": "boolean",
+                          "description": "Status da integração"
+                        },
+                        "apiKey": {
+                          "type": "string",
+                          "description": "Chave da API da integração"
+                        },
+                        "agentId": {
+                          "type": "string",
+                          "description": "ID do agente da integração"
+                        },
+                        "webhookId": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "ID do webhook da integração"
+                        },
+                        "disableOnMessage": {
+                          "type": "boolean",
+                          "description": "Desabilita a integração quando enviar uma mensagem de texto por dispositivo, WhatsApp Web ou Desktop"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Data de criação da integração"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Data de atualização da integração"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "enabled",
+                        "apiKey",
+                        "agentId",
+                        "disableOnMessage",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "integration"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletar integração",
+        "tags": [
+          "Integrações"
+        ],
+        "description": "Deleta a integração registrada no sistema.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/integrations/toggle": {
+      "patch": {
+        "summary": "Ativar/desativar integração",
+        "tags": [
+          "Integrações"
+        ],
+        "description": "Ativa/desativa a integração com o agente de IA.",
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/webhook": {
+      "post": {
+        "summary": "Criar webhook",
+        "tags": [
+          "Webhook"
+        ],
+        "description": "Cria um novo webhook para disparo de eventos do WhatsApp. Caso um webhook já tenha sido configurado, ele será substituído.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL que receberá as requisições do webhook. Ela deve estar preparada para receber requisições do tipo `POST`"
+                  },
+                  "secretKey": {
+                    "type": "string",
+                    "description": "Chave secreta para autenticar as requisições oriundas da API, e garantir a origem das informações (opcional)"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "summary": "Obter webhook",
+        "tags": [
+          "Webhook"
+        ],
+        "description": "Obtém o webhook configurado para disparo de eventos do WhatsApp.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string"
+                    },
+                    "secretKey": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "url"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Apagar webhook",
+        "tags": [
+          "Webhook"
+        ],
+        "description": "Apaga as configurações de webhook.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/text-to-speech/key": {
+      "post": {
+        "summary": "Atualizar API Key da ElevenLabs",
+        "tags": [
+          "ElevenLabs"
+        ],
+        "description": "Atualiza a API Key da ElevenLabs.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "apiKey": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "apiKey"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/text-to-speech/voices": {
+      "get": {
+        "summary": "Listar vozes da ElevenLabs",
+        "tags": [
+          "ElevenLabs"
+        ],
+        "description": "Lista as vozes disponíveis na ElevenLabs. É necessário cadastrar a API Key da ElevenLabs no endpoint `POST /text-to-speech/key`",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/text-to-speech/voices/{voiceId}": {
+      "put": {
+        "summary": "Selecionar voz da ElevenLabs",
+        "tags": [
+          "ElevenLabs"
+        ],
+        "description": "Seleciona a voz da ElevenLabs que será utilizada para conversão de texto para áudio. É necessário cadastrar a API Key da ElevenLabs no endpoint `POST /text-to-speech/key`",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "voiceId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/text-to-speech/settings": {
+      "get": {
+        "summary": "Buscar configurações da ElevenLabs",
+        "tags": [
+          "ElevenLabs"
+        ],
+        "description": "Busca as configurações de conversão de texto para áudio.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/text-to-speech": {
+      "post": {
+        "summary": "Enviar áudio a partir de texto",
+        "tags": [
+          "Mensagens",
+          "ElevenLabs"
+        ],
+        "description": "Envia áudio a partir de texto, utilizando a API do ElevenLabs. É necessário cadastrar a API Key da ElevenLabs no endpoint `POST /text-to-speech/key`",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Texto a ser convertido para áudio"
+                  },
+                  "voiceId": {
+                    "type": "string",
+                    "description": "ID da voz a ser utilizada. Caso não informada, será utilizada a voz padrão configurada na API."
+                  },
+                  "expiration": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "24h",
+                      "7d",
+                      "90d"
+                    ],
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  }
+                },
+                "required": [
+                  "jid",
+                  "text"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/jobs": {
+      "get": {
+        "summary": "Ver resumo da fila",
+        "tags": [
+          "Fila de jobs"
+        ],
+        "description": "Retorna um resumo das quantidades de jobs na fila, por status.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "active": {
+                      "type": "number"
+                    },
+                    "completed": {
+                      "type": "number"
+                    },
+                    "failed": {
+                      "type": "number"
+                    },
+                    "waiting": {
+                      "type": "number"
+                    },
+                    "delayed": {
+                      "type": "number"
+                    },
+                    "paused": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "active",
+                    "completed",
+                    "failed",
+                    "waiting",
+                    "delayed",
+                    "paused"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{status}": {
+      "get": {
+        "summary": "Listar jobs",
+        "tags": [
+          "Fila de jobs"
+        ],
+        "description": "Obtém a lista de jobs na fila de execução a partir do status do job",
+        "parameters": [
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "description": "Limite de itens por página"
+          },
+          {
+            "schema": {
+              "type": "number",
+              "default": 1
+            },
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "description": "Número da página"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "waiting",
+                "active",
+                "delayed",
+                "failed",
+                "paused"
+              ]
+            },
+            "in": "path",
+            "name": "status",
+            "required": true,
+            "description": "Status do job"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/jobs/{id}": {
+      "delete": {
+        "summary": "Remover job",
+        "tags": [
+          "Fila de jobs"
+        ],
+        "description": "Remove um job da fila. Se o job estiver ativo (em execução), retorna 409.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "removed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "enum": [
+                        "Job not found"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "enum": [
+                        "Job is active"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings": {
+      "post": {
+        "summary": "Atualizar configurações",
+        "tags": [
+          "Configurações"
+        ],
+        "description": "Atualiza as configurações de sua API.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "object",
+                    "properties": {
+                      "delay": {
+                        "type": "string",
+                        "enum": [
+                          "shortest",
+                          "short",
+                          "medium",
+                          "long"
+                        ],
+                        "description": "Delay para envio das mensagens. shortest: de 1 a 2 segundos | short: de 3 a 5 segundos | medium: de 7 a 10 segundos | long: de 12 a 15 segundos"
+                      },
+                      "enableSendPresenceUpdate": {
+                        "anyOf": [
+                          {
+                            "type": "boolean",
+                            "description": "Indica se deve enviar nas mensagens de texto e áudio o status _digitando_ ou _gravando áudio_. Função não disponível nas mensagens para grupos."
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "enableLinkPreview": {
+                        "anyOf": [
+                          {
+                            "type": "boolean",
+                            "description": "Indica se deve enviar o preview do link da mensagem de texto."
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "markAsRead": {
+                        "anyOf": [
+                          {
+                            "type": "boolean",
+                            "description": "Indica se deve marcar as mensagens como lidas automaticamente."
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ],
+                        "default": false
+                      }
+                    },
+                    "required": [
+                      "delay",
+                      "enableSendPresenceUpdate",
+                      "enableLinkPreview"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Configurações de envio de mensagens"
+                  },
+                  "integrations": {
+                    "type": "object",
+                    "properties": {
+                      "debounce": {
+                        "type": "number",
+                        "description": "Tempo de debounce para processar as mensagens do agente (em segundos)"
+                      },
+                      "splitMessage": {
+                        "anyOf": [
+                          {
+                            "type": "boolean",
+                            "description": "Dividir mensagem do agente em mensagens menores, utilizando as linhas em branco como separador"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "processImageLink": {
+                        "anyOf": [
+                          {
+                            "type": "boolean",
+                            "description": "Processar links de imagens do agente, convertendo os links em mensagens de mídia do tipo imagem"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "answerInAudio": {
+                        "anyOf": [
+                          {
+                            "type": "boolean",
+                            "description": "Responde mensagens em áudio quando o agente receber uma mensagem de áudio. É necessário ter configurado o ElevenLabs para responder em áudio."
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "debounce",
+                      "splitMessage",
+                      "processImageLink",
+                      "answerInAudio"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "messages",
+                  "integrations"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "summary": "Obter configurações",
+        "tags": [
+          "Configurações"
+        ],
+        "description": "Obtém as configurações de sua API.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "messages": {
+                      "type": "object",
+                      "properties": {
+                        "delay": {
+                          "type": "string",
+                          "enum": [
+                            "shortest",
+                            "short",
+                            "medium",
+                            "long"
+                          ],
+                          "description": "Delay entre mensagens"
+                        },
+                        "enableSendPresenceUpdate": {
+                          "anyOf": [
+                            {
+                              "type": "boolean",
+                              "description": "Ativar envio de atualização de presença"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "enableLinkPreview": {
+                          "anyOf": [
+                            {
+                              "type": "boolean",
+                              "description": "Ativar preview de links"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ],
+                          "default": false
+                        },
+                        "markAsRead": {
+                          "anyOf": [
+                            {
+                              "type": "boolean",
+                              "description": "Marcar mensagens como lidas automaticamente"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ],
+                          "default": false
+                        }
+                      },
+                      "required": [
+                        "delay",
+                        "enableSendPresenceUpdate"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "integrations": {
+                      "type": "object",
+                      "properties": {
+                        "debounce": {
+                          "type": "number",
+                          "description": "Debounce"
+                        },
+                        "splitMessage": {
+                          "anyOf": [
+                            {
+                              "type": "boolean",
+                              "description": "Dividir mensagem"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "processImageLink": {
+                          "anyOf": [
+                            {
+                              "type": "boolean",
+                              "description": "Processar links de imagens"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "answerInAudio": {
+                          "anyOf": [
+                            {
+                              "type": "boolean",
+                              "description": "Envia a resposta em áudio"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "debounce",
+                        "splitMessage",
+                        "processImageLink",
+                        "answerInAudio"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "messages",
+                    "integrations"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/privacy/block-user": {
+      "patch": {
+        "summary": "Bloquear usuário",
+        "tags": [
+          "Privacidade"
+        ],
+        "description": "Bloqueia um usuário da conta de WhatsApp conectada para não receber ou enviar mensagens para ele.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "description": "Número/JID do contato a ser bloqueado"
+                  }
+                },
+                "required": [
+                  "jid"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/privacy/unblock-user": {
+      "patch": {
+        "summary": "Desbloquear usuário",
+        "tags": [
+          "Privacidade"
+        ],
+        "description": "Desbloqueia um usuário da conta de WhatsApp conectada para receber ou enviar mensagens para ele.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "description": "Número/JID do contato a ser desbloqueado"
+                  }
+                },
+                "required": [
+                  "jid"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/privacy/block-list": {
+      "get": {
+        "summary": "Obter lista de usuários bloqueados",
+        "tags": [
+          "Privacidade"
+        ],
+        "description": "Obtém a lista de usuários bloqueados da conta de WhatsApp conectada.",
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/privacy/settings": {
+      "get": {
+        "summary": "Obter configurações de privacidade",
+        "tags": [
+          "Privacidade"
+        ],
+        "description": "Obtém as configurações de privacidade da conta de WhatsApp conectada.",
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Atualizar configurações de privacidade",
+        "tags": [
+          "Privacidade"
+        ],
+        "description": "Atualiza as configurações de privacidade da conta de WhatsApp conectada. Não é necessário enviar todos os campos, apenas os que deseja atualizar.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "last": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "contacts",
+                      "contact_blacklist",
+                      "none"
+                    ],
+                    "description": "Quem pode ver o status de visto pela última vez"
+                  },
+                  "online": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "match_last_seen"
+                    ],
+                    "description": "Quem pode ver o status de online"
+                  },
+                  "profile": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "contacts",
+                      "contact_blacklist",
+                      "none"
+                    ],
+                    "description": "Quem pode ver a foto do perfil"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "contacts",
+                      "contact_blacklist",
+                      "none"
+                    ],
+                    "description": "Quem pode ver a mensagem de status"
+                  },
+                  "readreceipts": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "none"
+                    ],
+                    "description": "Quem pode ver o status de mensagens lidas"
+                  },
+                  "groupadd": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "contacts",
+                      "contact_blacklist"
+                    ],
+                    "description": "Quem pode adicionar a conta de WhatsApp conectada a grupos"
+                  },
+                  "calladd": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "known"
+                    ],
+                    "description": "Quem pode adicionar a conta de WhatsApp conectada a chamadas"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.zapperapi.com/{instanceId}",
+      "description": "Development",
+      "variables": {
+        "instanceId": {
+          "description": "Identificador da sua instância",
+          "default": "inst_abcdefghijk1234567890z"
+        }
+      }
+    }
+  ]
+}
