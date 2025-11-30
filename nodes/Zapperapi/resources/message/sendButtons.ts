@@ -89,14 +89,8 @@ export const messageSendButtonsDescription: INodeProperties[] = [
 			{
 				name: 'buttonValues',
 				displayName: 'Button',
+				// eslint-disable-next-line n8n-nodes-base/node-param-fixed-collection-type-unsorted-items
 				values: [
-					{
-						displayName: 'Copy Code',
-						name: 'copyCode',
-						type: 'string',
-						default: '',
-						description: 'Valor a ser copiado ao clicar no botão (tipo copy)',
-					},
 					{
 						displayName: 'Display Text',
 						name: 'displayText',
@@ -112,13 +106,6 @@ export const messageSendButtonsDescription: INodeProperties[] = [
 							required:	true,
 						default: '',
 						description: 'Identificador\túnico do botão',
-					},
-					{
-						displayName: 'Phone Number',
-						name: 'phoneNumber',
-						type: 'string',
-						default: '',
-						description: 'Número de telefone a ser chamado ao clicar no botão (tipo call)',
 					},
 					{
 						displayName: 'Type',
@@ -147,9 +134,38 @@ export const messageSendButtonsDescription: INodeProperties[] = [
 						description: 'Tipo do botão',
 					},
 					{
+						displayName: 'Copy Code',
+						name: 'copyCode',
+						type: 'string',
+						displayOptions: {
+							show: {
+								type: ['copy'],
+							},
+						},
+						default: '',
+						description: 'Valor a ser copiado ao clicar no botão (tipo copy)',
+					},
+					{
+						displayName: 'Phone Number',
+						name: 'phoneNumber',
+						type: 'string',
+						displayOptions: {
+							show: {
+								type: ['call'],
+							},
+						},
+						default: '',
+						description: 'Número de telefone a ser chamado ao clicar no botão (tipo call)',
+					},
+					{
 						displayName: 'URL',
 						name: 'url',
 						type: 'string',
+						displayOptions: {
+							show: {
+								type: ['url'],
+							},
+						},
 						default: '',
 						description: 'URL a ser acessada ao clicar no botão (tipo URL)',
 					},
