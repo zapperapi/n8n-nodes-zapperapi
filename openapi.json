@@ -41,15 +41,9 @@
                       ]
                     },
                     "message": {
-                      "type": "string",
-                      "enum": [
-                        "welcome to zapperapi-core"
-                      ]
-                    },
-                    "version": {
                       "type": "string"
                     },
-                    "waVersion": {
+                    "version": {
                       "type": "string"
                     },
                     "docs": {
@@ -61,8 +55,33 @@
                     "status",
                     "message",
                     "version",
-                    "waVersion",
                     "docs"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "DOWN"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message"
                   ],
                   "additionalProperties": false
                 }
@@ -107,7 +126,8 @@
                       "type": "string",
                       "enum": [
                         "device",
-                        "cloud_api"
+                        "cloud_api",
+                        "gupshup"
                       ]
                     },
                     "status": {
@@ -243,6 +263,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "cloud_api",
+                      "gupshup"
+                    ],
+                    "default": "cloud_api"
+                  },
                   "phoneNumberId": {
                     "type": "string",
                     "minLength": 1,
@@ -257,6 +285,10 @@
                     "type": "string",
                     "minLength": 1,
                     "description": "Token de acesso da Meta com permissão para o WhatsApp Business API"
+                  },
+                  "forwardWebhook": {
+                    "type": "string",
+                    "description": "URL para redirecionar as mensagens enviadas pela API para serviços de terceiros"
                   }
                 },
                 "required": [
@@ -446,7 +478,12 @@
         "tags": [
           "Perfil"
         ],
-        "description": "Remove o foto do perfil da conta de WhatsApp conectada.",
+        "description": "Remove a foto do perfil da conta de WhatsApp conectada.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Default Response"
@@ -470,7 +507,7 @@
                   "jid": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Número de telefone, LID, id do grupo ou id da newsletter/canal. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`.\n\n\n      Para enviar mensagem para canais, o id deve ser enviado acrescido de `@newsletter`."
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
                   },
                   "message": {
                     "type": "string",
@@ -1560,6 +1597,105 @@
         }
       }
     },
+    "/messages/template": {
+      "post": {
+        "summary": "Enviar mensagem de template",
+        "tags": [
+          "Cloud API"
+        ],
+        "description": "Envia uma mensagem de template para um número de telefone.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número do telefone, com ou sem o sufixo `@s.whatsapp.net`. Não é permitido o uso de @lid na Cloud API."
+                  },
+                  "templateName": {
+                    "type": "string",
+                    "description": "Nome do template"
+                  },
+                  "language": {
+                    "type": "string",
+                    "description": "Código do idioma do template"
+                  },
+                  "components": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "header",
+                            "body",
+                            "footer",
+                            "button"
+                          ],
+                          "description": "Tipo do componente onde o parâmetro será inserido"
+                        },
+                        "parameters": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "description": "Tipo do parâmetro"
+                              },
+                              "parameter_name": {
+                                "type": "string",
+                                "description": "Nome do parâmetro (em caso de parâmetro nomeado). Para parâmetros posicionais, não é necessário informar."
+                              },
+                              "text": {
+                                "type": "string",
+                                "description": "Texto do parâmetro"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "text"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "parameters"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "jid",
+                  "templateName",
+                  "language",
+                  "components"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
     "/message-stats": {
       "get": {
         "summary": "Estatísticas de mensagens",
@@ -1650,6 +1786,323 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/message-templates": {
+      "get": {
+        "summary": "Listar templates de mensagens",
+        "tags": [
+          "Cloud API"
+        ],
+        "description": "Lista todos os templates disponíveis para a instância.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "number",
+              "default": 10
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "templates": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "language": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "components": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string"
+                                },
+                                "text": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "format": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "buttons": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "text": {
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "text",
+                                      "type"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  "nullable": true
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ],
+                              "additionalProperties": false
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "language",
+                          "category",
+                          "status",
+                          "components"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "next": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "previous": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "templates"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar template de mensagem",
+        "tags": [
+          "Cloud API"
+        ],
+        "description": "Cria um novo template de mensagem.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome do template. Deve ser em letras minúsculas, sem acentuação e sem espaços em branco, podendo ter underscore (_)"
+                  },
+                  "language": {
+                    "type": "string",
+                    "description": "Idioma do template (padrão: pt_BR)",
+                    "default": "pt_BR"
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "UTILITY",
+                      "MARKETING",
+                      "AUTHENTICATION"
+                    ],
+                    "description": "Categoria do template. Opções: UTILITY, MARKETING, AUTHENTICATION"
+                  },
+                  "components": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "HEADER",
+                            "BODY",
+                            "FOOTER",
+                            "BUTTONS"
+                          ],
+                          "description": "Tipo do componente"
+                        },
+                        "text": {
+                          "type": "string",
+                          "description": "Texto do componente"
+                        },
+                        "buttons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "text": {
+                                "type": "string",
+                                "description": "Texto do botão"
+                              },
+                              "type": {
+                                "type": "string",
+                                "description": "Tipo do botão"
+                              }
+                            },
+                            "required": [
+                              "text",
+                              "type"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "example": {
+                          "type": "object",
+                          "properties": {
+                            "body_text": {
+                              "type": "array",
+                              "items": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "description": "Exemplos de parâmetros posicionais para o texto do corpo"
+                            },
+                            "body_text_named_params": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "param_name": {
+                                    "type": "string"
+                                  },
+                                  "example": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "param_name",
+                                  "example"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "Exemplos de parâmetros nomeados para o texto do corpo"
+                            },
+                            "header_text": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Exemplos de parâmetros posicionais para o texto do cabeçalho"
+                            },
+                            "header_text_named_params": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "param_name": {
+                                    "type": "string"
+                                  },
+                                  "example": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "param_name",
+                                  "example"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "Exemplos de parâmetros nomeados para o texto do cabeçalho"
+                            },
+                            "button_text": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Exemplos de parâmetros posicionais para o texto dos botões"
+                            },
+                            "button_text_named_params": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "param_name": {
+                                    "type": "string"
+                                  },
+                                  "example": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "param_name",
+                                  "example"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "Exemplos de parâmetros nomeados para o texto dos botões"
+                            }
+                          },
+                          "additionalProperties": false,
+                          "description": "Exemplos para os parâmetros do componente"
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "category",
+                  "components"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
           }
         }
       }
@@ -2068,6 +2521,9 @@
                           "subjectOwner": {
                             "type": "string"
                           },
+                          "subjectOwnerPn": {
+                            "type": "string"
+                          },
                           "subjectTime": {
                             "type": "number"
                           },
@@ -2120,6 +2576,9 @@
                                 },
                                 "isSuperAdmin": {
                                   "type": "boolean"
+                                },
+                                "phoneNumber": {
+                                  "type": "string"
                                 },
                                 "admin": {
                                   "type": "string",
@@ -2561,7 +3020,7 @@
         "tags": [
           "Canais"
         ],
-        "description": "Lista todos os canais que o usuário participa ou é dono.",
+        "description": "Lista todos os canais que o usuário participa.",
         "security": [
           {
             "apiKey": []
@@ -2832,7 +3291,7 @@
         "tags": [
           "Integrações"
         ],
-        "description": "Deleta a integração registrada no sistema.",
+        "description": "Deleta a integração ativa.",
         "security": [
           {
             "apiKey": []
@@ -2847,11 +3306,16 @@
     },
     "/integrations/toggle": {
       "patch": {
-        "summary": "Ativar/desativar integração",
+        "summary": "Ativar/Desativar integração",
         "tags": [
           "Integrações"
         ],
-        "description": "Ativa/desativa a integração com o agente de IA.",
+        "description": "Ativa ou desativa a integração ativa.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Default Response"
@@ -2861,7 +3325,7 @@
     },
     "/webhook": {
       "post": {
-        "summary": "Criar webhook",
+        "summary": "Criar webhook legado",
         "tags": [
           "Webhook"
         ],
@@ -2921,16 +3385,27 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
                     "url": {
                       "type": "string"
                     },
-                    "secretKey": {
-                      "type": "string",
-                      "nullable": true
+                    "subscriptions": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
                   },
                   "required": [
-                    "url"
+                    "id",
+                    "name",
+                    "url",
+                    "subscriptions"
                   ],
                   "additionalProperties": false
                 }
@@ -2940,11 +3415,342 @@
         }
       },
       "delete": {
-        "summary": "Apagar webhook",
+        "summary": "Remover webhook legado",
         "tags": [
           "Webhook"
         ],
-        "description": "Apaga as configurações de webhook.",
+        "description": "Remove o webhook legado da instância.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/webhooks": {
+      "post": {
+        "summary": "Criar webhook",
+        "tags": [
+          "Webhook"
+        ],
+        "description": "Cria um novo webhook para disparo de eventos do WhatsApp.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome do webhook para identificação amigável."
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL que receberá as requisições do webhook. Ela deve estar preparada para receber requisições do tipo `POST`"
+                  },
+                  "subscriptions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "messages.upsert",
+                        "connection.update",
+                        "blocklist.set",
+                        "blocklist.update",
+                        "call",
+                        "chats.upsert",
+                        "chats.update",
+                        "chats.delete",
+                        "contacts.upsert",
+                        "contacts.update",
+                        "creds.update",
+                        "groups.upsert",
+                        "groups.update",
+                        "group-participants.update",
+                        "group.join-request",
+                        "labels.edit",
+                        "labels.association",
+                        "lid-mapping.update",
+                        "messages.delete",
+                        "messages.update",
+                        "messages.media-update",
+                        "messages.reaction",
+                        "message-receipt.update",
+                        "messaging-history.set",
+                        "newsletter.reaction",
+                        "newsletter.view",
+                        "newsletter-participants.update",
+                        "newsletter-settings.update",
+                        "presence.update"
+                      ]
+                    },
+                    "description": "Eventos que o webhook irá receber."
+                  }
+                },
+                "required": [
+                  "name",
+                  "url",
+                  "subscriptions"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "summary": "Listar webhooks",
+        "tags": [
+          "Webhook"
+        ],
+        "description": "Lista todos os webhooks configurados para a instância.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "webhooks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "subscriptions": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "url",
+                          "subscriptions"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "webhooks"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks/{webhookId}": {
+      "get": {
+        "summary": "Obter webhook",
+        "tags": [
+          "Webhook"
+        ],
+        "description": "Obtém o webhook pelo seu ID.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "webhookId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "webhook": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        },
+                        "subscriptions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "url",
+                        "subscriptions"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "webhook"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Obter webhook",
+        "tags": [
+          "Webhook"
+        ],
+        "description": "Obtém o webhook pelo seu ID.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome do webhook para identificação amigável."
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "URL que receberá as requisições do webhook."
+                  },
+                  "subscriptions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "messages.upsert",
+                        "connection.update",
+                        "blocklist.set",
+                        "blocklist.update",
+                        "call",
+                        "chats.upsert",
+                        "chats.update",
+                        "chats.delete",
+                        "contacts.upsert",
+                        "contacts.update",
+                        "creds.update",
+                        "groups.upsert",
+                        "groups.update",
+                        "group-participants.update",
+                        "group.join-request",
+                        "labels.edit",
+                        "labels.association",
+                        "lid-mapping.update",
+                        "messages.delete",
+                        "messages.update",
+                        "messages.media-update",
+                        "messages.reaction",
+                        "message-receipt.update",
+                        "messaging-history.set",
+                        "newsletter.reaction",
+                        "newsletter.view",
+                        "newsletter-participants.update",
+                        "newsletter-settings.update",
+                        "presence.update"
+                      ]
+                    },
+                    "description": "Eventos que o webhook irá receber."
+                  }
+                },
+                "required": [
+                  "name",
+                  "url",
+                  "subscriptions"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "webhookId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remover webhook",
+        "tags": [
+          "Webhook"
+        ],
+        "description": "Remove um webhook pelo seu ID.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "webhookId",
+            "required": true
+          }
+        ],
         "security": [
           {
             "apiKey": []
@@ -3001,7 +3807,7 @@
         "tags": [
           "ElevenLabs"
         ],
-        "description": "Lista as vozes disponíveis na ElevenLabs. É necessário cadastrar a API Key da ElevenLabs no endpoint `POST /text-to-speech/key`",
+        "description": "Lista todas as vozes disponíveis na ElevenLabs.",
         "security": [
           {
             "apiKey": []
@@ -3045,11 +3851,11 @@
     },
     "/text-to-speech/settings": {
       "get": {
-        "summary": "Buscar configurações da ElevenLabs",
+        "summary": "Obter configurações de texto para voz",
         "tags": [
           "ElevenLabs"
         ],
-        "description": "Busca as configurações de conversão de texto para áudio.",
+        "description": "Obtém as configurações de texto para voz da instância.",
         "security": [
           {
             "apiKey": []
@@ -3675,11 +4481,16 @@
     },
     "/privacy/block-list": {
       "get": {
-        "summary": "Obter lista de usuários bloqueados",
+        "summary": "Obter lista de bloqueio",
         "tags": [
           "Privacidade"
         ],
-        "description": "Obtém a lista de usuários bloqueados da conta de WhatsApp conectada.",
+        "description": "Obtém a lista de bloqueio da conta de WhatsApp conectada.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Default Response"
@@ -3694,6 +4505,11 @@
           "Privacidade"
         ],
         "description": "Obtém as configurações de privacidade da conta de WhatsApp conectada.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Default Response"
@@ -3788,17 +4604,5 @@
         }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://api.zapperapi.com/{instanceId}",
-      "description": "Development",
-      "variables": {
-        "instanceId": {
-          "description": "Identificador da sua instância",
-          "default": "inst_abcdefghijk1234567890z"
-        }
-      }
-    }
-  ]
+  }
 }

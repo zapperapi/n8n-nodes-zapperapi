@@ -10,6 +10,7 @@ import { messageDeleteDescription } from './delete';
 import { messageSendButtonsDescription } from './sendButtons';
 import { messageSendListDescription } from './sendList';
 import { messageSendCarouselDescription } from './sendCarousel';
+import { messageSendTemplateDescription } from './sendTemplate';
 
 const showOnlyForMessages = {
 	resource: ['message'],
@@ -146,6 +147,18 @@ export const messageDescription: INodeProperties[] = [
 				},
 			},
 			{
+				name: 'Send Template',
+				value: 'sendTemplate',
+				action: 'Enviar mensagem de template',
+				description: 'Envia uma mensagem de template para um número de telefone',
+				routing: {
+					request: {
+						method: 'POST',
+						url: '/messages/template',
+					},
+				},
+			},
+			{
 				name: 'Send Text',
 				value: 'sendText',
 				action: 'Send a text message',
@@ -171,4 +184,5 @@ export const messageDescription: INodeProperties[] = [
 	...messageSendButtonsDescription,
 	...messageSendListDescription,
 	...messageSendCarouselDescription,
+	...messageSendTemplateDescription,
 ];
