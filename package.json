@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-zapperapi",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Node oficial da ZapperAPI",
   "license": "MIT",
   "homepage": "https://zapperapi.com",
